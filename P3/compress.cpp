@@ -1,10 +1,14 @@
 #include <iostream>
+#include <iomanip>
 #include <fstream>
+#include "HCTree.hpp"
+#include "HCNode.hpp"
+#include "BitOutputStream.hpp"
 using namespace std;
 
 
 int read_input_file(char*,char**);
-int write_output_file(char*,char*,int);
+
 
 int main(int argc, char** argv){
 
@@ -12,25 +16,52 @@ int main(int argc, char** argv){
 
 	// Initialize Variables
 	int fileSize;
-	int byteWritten;
 	char* fileContent;
+	
+	HCTree* huffmanTree = new HCTree();
+	vector<int> frequency = vector<int>(256,0);
+
 
 
 	// Read input file and store content in fileContent.
 	fileSize = read_input_file(argv[1], &fileContent);
-	//if(fileSize < 0) return -1;
+	if(fileSize < 0) return -1;
 
-	// Compress the content using Huffman Coding Tree
+	// Get frequency counts
+	for(int i = 0; i < fileSize; i++){
+		frequency[(int)(fileContent[i])]++;
+	}
+
+	huffmanTree->build(frequency);
 
 
-	// Write the compressed content to output file
-	byteWritten = write_output_file(argv[2],fileContent,fileSize);
-	if(byteWritten < 0) return -1;
 
-	cout << fileSize << " bytes written to file: " << argv[2] << endl;
+	// Open output file
+	ofstream fileOut;
+	fileOut.open(argv[2], ios::binary);
+	if(!fileOut.is_open()) {
+		cout << "Output file opening Error!!!" << endl;
+		return -1;
+	}
+	BitOutputStream* out = new BitOutputStream(fileOut);
+	//Use huffman tree to write encoded content
+	for(int index = 0; index < fileSize; index++){
+		huffmanTree->encode(fileContent[index], *out);
+	}	
+	fileOut.close();
 
-	// Clean up
+
+
+
+
+
+
+
+
+	// // Clean up
+	// fileOut.close();
 	delete [] fileContent;
+	delete huffmanTree;
 
 	return 0;
 }
@@ -55,23 +86,5 @@ int read_input_file(char * fileName, char ** content){
 	// Read in the entire file at once
 	fileIn.read(*content, fileSize);
 	fileIn.close();
-	return fileSize;
-}
-
-// Parameter 1: output file name 		char array
-// Parameter 2: the content to write	char array
-// Parameter 3: the size of content 	int
-int write_output_file(char* fileName, char* content, int fileSize){
-	// Write decoded bytes to the given file 
-	ofstream fileOut;
-	fileOut.open(fileName, ios::binary);
-	if(!fileOut.is_open()) {
-		cout << "Output file opening Error!!!" << endl;
-		delete [] content;
-		return -1;
-	}
-	// Write to file
-	fileOut.write(content, fileSize);
-	fileOut.close();
 	return fileSize;
 }

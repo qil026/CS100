@@ -29,10 +29,25 @@ class HCTree {
 private:
     HCNode* root;
     vector<HCNode*> leaves;
+    priority_queue<HCNode*>* forest;
+    HCNode* reference[256];
 
 public:
+
+    HCNode* get_root(){
+        return root;
+    }
+
+// Debug functions above here
+//---------------------------------------------------------------------
+    void delete_node(HCNode**);
+
+    void print_node_path(HCNode *, BitOutputStream&) const;
+
+
     explicit HCTree() : root(0) {
         leaves = vector<HCNode*>(256, (HCNode*) 0);
+        forest = new priority_queue<HCNode*>();
     }
 
     ~HCTree();

@@ -3,7 +3,8 @@
 using namespace std;
 
 bool HCNode::operator<(const HCNode& other){
-	return (this->count > other.count);
+	return (this->count < other.count);
+	cout << "Im comparing!!" << endl;
 }
 
 bool comp(HCNode* one, HCNode* other){

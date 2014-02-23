@@ -1,6 +1,8 @@
 #include "HCTree.hpp"
 #include "HCNode.hpp"
 #include <iostream>
+using namespace std;
+
 
 void HCTree::delete_node(HCNode** node){
 	if((**node).c0 != 0) delete_node(&((**node).c0));
@@ -24,7 +26,14 @@ void HCTree::build(const vector<int>& freqs){
 			forest->push(node);
 		}
 	}
-
+	priority_queue<HCNode*> backup;
+	while(forest->size() > 0){
+		HCNode* temp = forest->top();
+		forest->pop();
+		backup.push(temp);
+		cout << "Byte: " << (char)temp->symbol << ",  Count: " << temp->count << endl;
+	}
+	*forest = backup;
 	while(forest->size() > 1){
 		HCNode* node_1 = forest->top();
 		forest->pop();
@@ -38,7 +47,6 @@ void HCTree::build(const vector<int>& freqs){
 		forest->push(parent);
 	}
 	root = forest->top();
-	root->display();
 }
 
 void HCTree::print_node_path(HCNode* node, BitOutputStream & out) const{

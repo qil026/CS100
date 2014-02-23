@@ -47,7 +47,7 @@ public:
 
     explicit HCTree() : root(0) {
         leaves = vector<HCNode*>(256, (HCNode*) 0);
-        forest = new priority_queue<HCNode*>();
+        forest = new priority_queue<HCNode*,std::vector<HCNode*>,std::greater<HCNode*> >();
     }
 
     ~HCTree();

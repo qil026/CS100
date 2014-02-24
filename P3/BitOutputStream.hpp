@@ -20,6 +20,8 @@ public:
 
 	void writeBit(int i );
 
+	void finalFlush();
+
 };
 
 #endif

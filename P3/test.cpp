@@ -11,11 +11,12 @@ using namespace std;
 
 int main(){
 
-	char * abc;
-	char string[] = "a;sdlkfjaweof;iawejfawef";
-	abc = string;
+	ofstream fout;
+	fout.open("fout",ios::binary);
+	fout.put('a');
+	fout.put('b');
+	fout.put('c');
 
-	cout << abc[12] << endl;
-
+	fout.close();
 	return 0;
 }

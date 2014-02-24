@@ -18,7 +18,7 @@ public:
   HCNode* c0;  // pointer to '0' child
   HCNode* c1;  // pointer to '1' child
   HCNode* p;   // pointer to parent
-  int child;
+  int child;   // Indicate if node is a 0 child or 1 child
 
   HCNode(int count,
 	 byte symbol,
@@ -27,10 +27,6 @@ public:
 	 HCNode* p = 0)
     : count(count), symbol(symbol), c0(c0), c1(c1), p(p) { }
 
-
-
-
-    void display();
 
 
   /** Less-than comparison, so HCNodes will work in std::priority_queue

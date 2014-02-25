@@ -3,6 +3,7 @@
 void BitOutputStream::flush(){
 	out.put((char)(buf.to_ulong()));
 	out.flush();
+	//std::cout << std::endl;
 	buf.reset();
 	nbits = 7;
 }

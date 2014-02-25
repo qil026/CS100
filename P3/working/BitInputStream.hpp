@@ -11,7 +11,7 @@ private:
 public:
 	BitInputStream(std::ifstream & in):in(in){
 		buf = 0;
-		nbits = -1;
+		nbits = 7;
 	}
 
 	void fill();

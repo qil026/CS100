@@ -1,4 +1,6 @@
 #include "HCNode.hpp"
+#include <iostream>
+using namespace std;
 
 bool HCNode::operator<(const HCNode& other){
 	return (this->count > other.count);
@@ -8,3 +10,4 @@ bool HCNode::operator<(const HCNode& other){
 bool comp(HCNode* one, HCNode* other){
 	return (one < other);
 }
+

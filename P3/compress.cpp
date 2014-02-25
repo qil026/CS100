@@ -1,111 +1,81 @@
-#include <iostream>
-#include <iomanip>
-#include <fstream>
-#include "HCTree.hpp"
-#include "HCNode.hpp"
 #include "BitOutputStream.hpp"
+#include "HCTree.hpp"
+#include <iostream>
+#include <fstream>
+#include <vector>
 using namespace std;
 
-
-int read_input_file(char*,char**);
-void create_empty_out_file(char*);
+void get_input_file_byte_frequency(char* file, vector<int>* frequency);
 
 int main(int argc, char** argv){
 
-	if (argc != 3) return 1;
+	if(argc != 3){
+		cout << "Incorrect number of args. Error" << endl;
+		return 1;
+	}
 
-	// Initialize Variables
-	int fileSize;
-	char* fileContent;
-	ofstream fileOut;
-	BitOutputStream* out;
-	HCTree* huffmanTree;
-	vector<int> frequency;
+	// Part 1: Open input file to read
+	// Fill out frequency array.
+	unsigned long fileSize;
+	vector<int>* frequency = new vector<int>(256, 0l);
+	ifstream fin;
+	// Get file size by placing read pointer at the end
+	fin.open(argv[1], ios::binary | ios::ate);
+	fileSize = fin.tellg();
+	// Put pointer back to beginning
+	fin.seekg(0,ios::beg);
+	// loop through file to populate frequency vector
+	for(long i = 0; i < fileSize; i++){
+		unsigned char value = fin.get();
+		unsigned int index = (unsigned int) value;
+		(*frequency)[index]++;
+	}
+	// Put pointer back for later processing
+	fin.seekg(0,ios::beg);
+	
 
-	// Initialize variables
-	huffmanTree = new HCTree();
-	frequency = vector<int>(256,0);
+	// Part 2: Create Huffman Coding Tree object, then provide
+	// the frequency vector to build the actual tree.
+	HCTree* huffman = new HCTree();
+	huffman->build(*frequency);
 
-
-
-	// Read input file and store content in fileContent.
-	fileSize = read_input_file(argv[1], &fileContent);
-	if(fileSize == 0){
-		create_empty_out_file(argv[2]);
+	// Part 3: Write to output file
+	// First generate header bits and write to given file
+	// Then calculate and write padding bit info
+	// Finally write the encoded body to file
+	// step 0, open output file and create bitoutputstream object.
+	ofstream fout;
+	fout.open(argv[2], ios::binary);
+	if(!fout.is_open()){
+		cout << "Couldn't open output file to write. Error!" << endl;
 		return 2;
 	}
-	if(fileSize < 0) return 3;
-
-
-	// Get frequency counts
+	BitOutputStream* out = new BitOutputStream(fout);
+	// step 1, write header bits into file (including padding info)
+	huffman->generate_header_bits(*out);
+	// step 2, write encoded content into output file
+	// loop through input content and encode each byte
 	for(int i = 0; i < fileSize; i++){
-		frequency[(int)(fileContent[i])]++;
+		unsigned char byte = fin.get();
+		huffman->encode(byte, *out);
 	}
-	// Build huffmanTree
-	huffmanTree->build(frequency);
-
-
-
-	// Open output file
-	fileOut.open(argv[2], ios::binary);
-	if(!fileOut.is_open()) {
-		cout << "Output file opening Error!!!" << endl;
-		return 4;
-	}
-	out = new BitOutputStream(fileOut);
-
-	// Write header bits
-	huffmanTree->generate_header_bits(*out);
-	//Use huffman tree to write encoded content
-	for(int index = 0; index < fileSize; index++){
-		cout << "Symbol: " << fileContent[index] << ",  pattern: ";
-		huffmanTree->encode(fileContent[index], *out);
-		cout << endl;
-	}	
 	out->finalFlush();
-	fileOut.close();
 
 
-
-	cout << endl;
-
-
-
-
-
-	// // Clean up
-	// fileOut.close();
-	delete [] fileContent;
-	delete huffmanTree;
+	// Part 4: Clean up variables
+	fin.close();
+	fout.close();
+	delete frequency;
+	delete huffman;
+	delete out;
 
 	return 0;
 }
 
 
-//---------------------------------------------------------
-
-// Parameter 1: input file name 					char array
-// Parameter 2: memory address to store content 	address of char array
-int read_input_file(char * fileName, char ** content){
-	ifstream fileIn;
-	fileIn.open(fileName, ios::ate|ios::binary);
-	if(!fileIn.is_open()){
-		cout << "Input file opening Error!!" << endl;
-		delete [] content;
-		return -1;
-	} 
-	// Get file size first
-	int fileSize = fileIn.tellg();
-	*content = new char[fileSize];
-	fileIn.seekg(0, ios::beg);
-	// Read in the entire file at once
-	fileIn.read(*content, fileSize);
-	fileIn.close();
-	return fileSize;
-}
-
-void create_empty_out_file(char* name){
-	ofstream fout;
-	fout.open(name,ios::trunc);
-	fout.close();
+// Read input file byte by byte, for each byte, use it as the index to
+// frequency vecotr, then add one the corresponding element.
+// No return needed
+void get_input_file_byte_frequency(char* file, vector<int>* frequency){
+	
 }

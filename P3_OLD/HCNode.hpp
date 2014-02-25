@@ -19,15 +19,13 @@ public:
   HCNode* c1;  // pointer to '1' child
   HCNode* p;   // pointer to parent
   int child;   // Indicate if node is a 0 child or 1 child
-  bool leaf;   // If node is a leaf or not
 
   HCNode(int count,
-   byte symbol,
-   bool leaf,
-   HCNode* c0 = 0,
-   HCNode* c1 = 0,
-   HCNode* p = 0)
-    : count(count), symbol(symbol), leaf(leaf), c0(c0), c1(c1), p(p) { }
+	 byte symbol,
+	 HCNode* c0 = 0,
+	 HCNode* c1 = 0,
+	 HCNode* p = 0)
+    : count(count), symbol(symbol), c0(c0), c1(c1), p(p) { }
 
 
 

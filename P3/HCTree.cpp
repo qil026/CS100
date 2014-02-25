@@ -76,8 +76,8 @@ void HCTree::encode(byte symbol, BitOutputStream& out) const{
 
 void HCTree::rebuild(BitInputStream& in) {
 	queue<HCNode*> * nodes = new queue<HCNode*>();
-	HCNode* parent;
-	HCNode* newNode;
+	HCNode* parent = 0;
+	HCNode* newNode = 0;
 
 	// Read first node
 	int bit = in.readBit();
@@ -109,7 +109,38 @@ void HCTree::rebuild(BitInputStream& in) {
 		parent->c1 = newNode;
 	}	
 	delete nodes;
+
+	// Debug:
+	print_tree();
+
+	// Read the padding bits and record its value in "unsigned int padding" variable
+	unsigned int padding = 0;
+	for(int i = 2; i >= 0; i--){
+		unsigned int bit = in.readBit();
+		bit = bit & 0x01; //just to make sure sign stuff..
+		bit <<= i;
+		padding |= bit;
+	}
+	// Read in the padding bits and discard them.
+	for(unsigned int i = 0; i < padding; i++) in.readBit();
 }
+
+
+
+
+// loop through the rest of the bits
+// Decode them and return value
+int HCTree::decode(BitInputStream& in) const{
+	HCNode* node = root;
+	do{
+		int bit = in.readBit();
+		if(bit == 0) node = node->c0;
+		else if(bit == 1) node = node->c1;
+	} while(!(node->leaf));
+	// Exit only when we reach a leaf
+	return (unsigned int)node->symbol;
+}
+
 
 // Private Helper Function Implementations: For use by Public functions defined above.
 // -----------------------------------------------------------------------------------
@@ -124,7 +155,7 @@ void HCTree::serialize_tree(){
 
 unsigned long HCTree::write_tree_structure(BitOutputStream& out){
 	unsigned long total = 0l;
-	for(int i = 0; i < vertex->size(); i++){
+	for(unsigned int i = 0; i < vertex->size(); i++){
 		HCNode* node = vertex->at(i);
 		// If node is a leaf, write '1' followed by symbol
 		if(node->leaf){
@@ -155,7 +186,7 @@ void HCTree::write_padding_bit(unsigned long bitsWritten, BitOutputStream& out){
 	// Traverse through the serialized tree:
 	// count * path_lengh => total bits for that node symbol
 	// cout << "Vertex size: " << vertex->size() << endl;
-	for(int i = 0; i < vertex->size(); i++){
+	for(unsigned int i = 0; i < vertex->size(); i++){
 		HCNode* node = vertex->at(i);
 		if(node->leaf){
 			unsigned long bits = node->count * get_depth(node);
@@ -172,13 +203,17 @@ void HCTree::write_padding_bit(unsigned long bitsWritten, BitOutputStream& out){
 	out.writeBit(padding & 2);
 	out.writeBit(padding & 1);
 
+	// FIll the padding right away:
+	for(unsigned int i = 0; i < padding; i++)
+		out.writeBit(0);
+
 	//Debuggin:
-	cout << "Header bits written: " << headerBits << endl;
-	cout << "Padding bits written: " << paddingBits << endl;
-	cout << "Encoded bits written: " << encodedBits << endl;
-	cout << "Total bits is: " << total << endl;
-	cout << "Total mod 8 is: " << total%8 << endl;
-	cout << "Based on this info, the padding value is: " << padding << endl;
+	// cout << "Header bits written: " << headerBits << endl;
+	// cout << "Padding bits written: " << paddingBits << endl;
+	// cout << "Encoded bits written: " << encodedBits << endl;
+	// cout << "Total bits is: " << total << endl;
+	// cout << "Total mod 8 is: " << total%8 << endl;
+	// cout << "Based on this info, the padding value is: " << padding << endl;
 }
 
 unsigned long HCTree::get_depth(HCNode* node){
@@ -231,3 +266,36 @@ unsigned char HCTree::retrieve_byte_value(BitInputStream& in){
 	// }
 	// return result;
 }
+
+
+void HCTree::print_tree(){
+	cout << "Printing tree structure: " << endl;
+	int height = calculate_tree_height(root);
+	cout << "  height = " << height << endl;
+
+	queue<HCNode*>* nodes = new queue<HCNode*>();
+	nodes->push(root);
+	while(nodes->size() > 0){
+		HCNode* node = nodes->front();
+		nodes->pop();
+		cout << "  " << *node;
+		if(node->leaf) cout << "  leaf";
+		cout << endl;
+		if(node->c0 != 0) nodes->push(node->c0);
+		if(node->c1 != 0) nodes->push(node->c1);
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

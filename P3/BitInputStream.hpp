@@ -18,6 +18,7 @@ public:
 
 	int readBit();
 
+	bool hasMoreBit();
 };
 
 #endif

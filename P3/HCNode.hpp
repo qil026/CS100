@@ -15,11 +15,11 @@ class HCNode {
 public:
   int count;
   byte symbol; // byte in the file we're keeping track of
+  bool leaf;   // If node is a leaf or not
   HCNode* c0;  // pointer to '0' child
   HCNode* c1;  // pointer to '1' child
   HCNode* p;   // pointer to parent
   int child;   // Indicate if node is a 0 child or 1 child
-  bool leaf;   // If node is a leaf or not
 
   HCNode(int count,
    byte symbol,

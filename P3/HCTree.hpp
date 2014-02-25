@@ -42,6 +42,10 @@ private:
     void print_node_path(HCNode*,BitOutputStream&) const;
 
     unsigned char retrieve_byte_value(BitInputStream&);
+
+    // Debugging Functions
+    void print_tree();
+    
 public:
     explicit HCTree() : root(0) {
         leaves = new vector<HCNode*>(256, (HCNode*) 0);
@@ -80,7 +84,7 @@ public:
      */ 
     void generate_header_bits(BitOutputStream & out);
 
-    /** Rebuild huffman coding tree from de-serilized data
+    /** Rebuild huffman coding tree from serilized data
      *  For each input bit, if it's 0, it's an internal node, if it's 1, 
      *  it's a leaf. Keep track of children count so we know when to stop.
      */

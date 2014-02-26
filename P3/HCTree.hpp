@@ -1,7 +1,6 @@
 #ifndef HCTREE_HPP
 #define HCTREE_HPP
 
-#include <queue>
 #include <vector>
 #include "HCNode.hpp"
 #include "BitInputStream.hpp"

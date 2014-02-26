@@ -184,6 +184,10 @@ unsigned int HCTree::get_single_char_length(BitInputStream& in){
 	return result;
 }
 
+
+
+
+
 // Private Helper Function Implementations: For use by Public functions defined above.
 // -----------------------------------------------------------------------------------
 

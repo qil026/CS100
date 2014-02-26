@@ -18,19 +18,6 @@ int BitInputStream::readBit(){
 }
 
 bool BitInputStream::hasMoreBit(){
-	// if(nbits >= 0){
-	// 	cout << "nbits = " << nbits << " return true" << endl;
-	// 	return true;
-	// }
-	// cout << "nbints = " << nbits;
-	// if(in.eof()){
-	// 	cout << ",  we've reached end of file. return false." << endl;
-	// 	return false;
-	// }
-	// else {
-	// 	cout << ",  we have more bits to read. return true" << endl;
-	// 	return true;
-	// }
 	if(nbits >= 0) return true;
 	else{
 		unsigned char anything = in.get();

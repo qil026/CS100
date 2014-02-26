@@ -7,6 +7,7 @@ using namespace std;
 
 void get_input_file_byte_frequency(char* file, vector<int>* frequency);
 
+
 int main(int argc, char** argv){
 
 	if(argc != 3){
@@ -70,6 +71,7 @@ int main(int argc, char** argv){
 		}
 		out->finalFlush();
 	}
+
 
 
 	// Part 4: Clean up variables

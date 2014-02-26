@@ -8,9 +8,8 @@ void BitInputStream::fill(){
 }
 
 int BitInputStream::readBit(){
-	if(nbits < 0) {
-		fill();
-	}
+	if(nbits < 0) fill();
+
 	unsigned char result = buf;
 	result >>= nbits;
 	result &= 0x01;

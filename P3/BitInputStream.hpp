@@ -6,12 +6,14 @@ class BitInputStream{
 private:
 	unsigned char buf;
 	int nbits;
+	bool untouched;
 	std::ifstream & in;
 	
 public:
 	BitInputStream(std::ifstream & in):in(in){
 		buf = 0;
 		nbits = -1;
+		untouched = true;
 	}
 
 	void fill();
@@ -19,6 +21,8 @@ public:
 	int readBit();
 
 	bool hasMoreBit();
+
+	bool endOfFile();
 };
 
 #endif

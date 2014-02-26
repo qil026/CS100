@@ -28,6 +28,7 @@ public:
 class HCTree {
 private:
     HCNode* root;
+    unsigned int singleChar;
     vector<HCNode*>* leaves;
     vector<HCNode*>* vertex;
 
@@ -40,7 +41,7 @@ private:
     void write_padding_bit(unsigned long, BitOutputStream&);
     unsigned long get_depth(HCNode*);
     void print_node_path(HCNode*,BitOutputStream&) const;
-
+    void write_length(unsigned long, BitOutputStream&);
     unsigned char retrieve_byte_value(BitInputStream&);
 
     // Debugging Functions
@@ -50,6 +51,7 @@ public:
     explicit HCTree() : root(0) {
         leaves = new vector<HCNode*>(256, (HCNode*) 0);
         vertex = new vector<HCNode*>();
+        singleChar = 0;
     }
 
     ~HCTree();
@@ -60,7 +62,7 @@ public:
      *  POSTCONDITION:  root points to the root of the trie,
      *  and leaves[i] points to the leaf node containing byte i.
      */
-    void build(const vector<int>& freqs);
+    int build(const vector<int>& freqs);
 
     /** Write to the given BitOutputStream
      *  the sequence of bits coding the given symbol.
@@ -68,6 +70,13 @@ public:
      *  tree, and initialize root pointer and leaves vector.
      */
     void encode(byte symbol, BitOutputStream& out) const;
+
+    /** Receives the length of the single char
+     *  Calculate the number of digits needed to represent this length
+     *  in binary. Then calculate the appropriate padding.
+     *  Finally write the length into output stream.
+     */
+    void write_single_char(unsigned long, BitOutputStream&);
 
     /** Return symbol coded in the next sequence of bits from the stream.
      *  PRECONDITION: build() has been called, to create the coding
@@ -88,7 +97,9 @@ public:
      *  For each input bit, if it's 0, it's an internal node, if it's 1, 
      *  it's a leaf. Keep track of children count so we know when to stop.
      */
-    void rebuild(BitInputStream& in);
+    int rebuild(BitInputStream& in);
+
+    unsigned int get_single_char_length(BitInputStream&);
 };
 
 #endif // HCTREE_HPP

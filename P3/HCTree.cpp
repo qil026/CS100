@@ -16,23 +16,30 @@ HCTree::~HCTree(){
 	delete leaves;
 	delete vertex;
 	// Delete all nodes created in build().
-	delete_node(root);
+	if(root != 0)
+		delete_node(root);
 }
 
 
-void HCTree::build(const vector<int>& freqs){
+int HCTree::build(const vector<int>& freqs){
 	// Initialize the priority queue.
     priority_queue<HCNode*,std::vector<HCNode*>, HCNodePtrComp>* forest = 
     					new priority_queue<HCNode*,std::vector<HCNode*>, HCNodePtrComp>();
 
 	// Insert all non-zero frequencies into the priority queue
    	// Nodes created in for loop are all leaves, so mark with true.
-	for(int i = 0; i < freqs.size(); i++){
+	for(unsigned int i = 0; i < freqs.size(); i++){
 		if(freqs[i] > 0){
 			HCNode* node = new HCNode(freqs[i],(unsigned)i, true);
 			(*leaves)[i] = node;
 			forest->push(node);	
 		}
+	}
+	// Return if there's only one char
+	if(forest->size() == 1){
+		root = forest->top();
+		delete forest;
+		return 1;
 	}
 	// Using priority queue to build Huffman coding tree
 	// New nodes created below are not leaves, so mark them with false
@@ -55,6 +62,7 @@ void HCTree::build(const vector<int>& freqs){
 	}
 	// Purpose of priority queue is accomplished, so destroy it here.
 	delete forest;
+	return 0;
 }
 
 void HCTree::generate_header_bits(BitOutputStream& out){
@@ -71,10 +79,32 @@ void HCTree::encode(byte symbol, BitOutputStream& out) const{
 	HCNode* node = (*leaves)[(unsigned int)symbol];
 	if(node != root)
 		print_node_path(node, out);
+	else{
+		// Single char case where root is a symbol
+
+	}
 }
 
 
-void HCTree::rebuild(BitInputStream& in) {
+void HCTree::write_single_char(unsigned long fileSize, BitOutputStream& out){
+	// Get the bit length of this number
+	int bitLength = 0;
+	unsigned long size = fileSize;
+	while(size > 0){
+		size = size >> 1;
+		bitLength++;
+	}
+	// Calculate the paddings we need
+	int padding = bitLength % 8;
+	padding = 7 - padding;		// it's guaranteed we have 9 bits for header, so use 7 instead of 8
+								// to account for the extra bit in the second byte.
+	// Now fill the padding bits with 0
+	for(int i = 0; i < padding; i++) out.writeBit(0);
+	// Now we are proper aligned. Write the length in binary.
+	write_length(fileSize,out);
+}
+
+int HCTree::rebuild(BitInputStream& in) {
 	queue<HCNode*> * nodes = new queue<HCNode*>();
 	HCNode* parent = 0;
 	HCNode* newNode = 0;
@@ -84,7 +114,9 @@ void HCTree::rebuild(BitInputStream& in) {
 	if(bit == 0) nodes->push(newNode=new HCNode(0,0,false));	 
 	else if (bit == 1){
 		char result = retrieve_byte_value(in);
-		newNode = new HCNode(0,result,true);
+		root = new HCNode(0,result,true);
+		delete nodes;
+		return (unsigned int)(result);
 	}
 	root = newNode;
 
@@ -110,9 +142,6 @@ void HCTree::rebuild(BitInputStream& in) {
 	}	
 	delete nodes;
 
-	// Debug:
-	print_tree();
-
 	// Read the padding bits and record its value in "unsigned int padding" variable
 	unsigned int padding = 0;
 	for(int i = 2; i >= 0; i--){
@@ -123,6 +152,7 @@ void HCTree::rebuild(BitInputStream& in) {
 	}
 	// Read in the padding bits and discard them.
 	for(unsigned int i = 0; i < padding; i++) in.readBit();
+	return -1;
 }
 
 
@@ -141,6 +171,18 @@ int HCTree::decode(BitInputStream& in) const{
 	return (unsigned int)node->symbol;
 }
 
+
+unsigned int HCTree::get_single_char_length(BitInputStream& in){
+	unsigned int result = 0;
+	while(in.hasMoreBit()){
+		result <<= 1;
+		int bit = in.readBit();
+		if(bit == 1){
+			result |= 0x1;
+		}
+	}
+	return result;
+}
 
 // Private Helper Function Implementations: For use by Public functions defined above.
 // -----------------------------------------------------------------------------------
@@ -177,6 +219,10 @@ unsigned long HCTree::write_tree_structure(BitOutputStream& out){
 }
 
 void HCTree::write_padding_bit(unsigned long bitsWritten, BitOutputStream& out){
+	// If no root, that's empty file, just return
+	if(root == 0) return;
+	// If root has no children, then no need to write padding
+	if(root->c0 == 0 || root->c1 == 0) return;
 	// Total bits will be written to file is:
 	// header bits + padding bits + encoded bits
 	unsigned long headerBits = bitsWritten;
@@ -287,7 +333,12 @@ void HCTree::print_tree(){
 }
 
 
-
+void HCTree::write_length(unsigned long fileSize, BitOutputStream& out){
+	if(fileSize == 0) return;
+	write_length(fileSize >> 1, out);
+	fileSize = fileSize & 0x1;
+	out.writeBit((unsigned int)fileSize);
+}
 
 
 

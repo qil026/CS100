@@ -65,15 +65,11 @@ int main(int argc, char** argv){
 	}
 	
 
-
-
-
 	// Part 4: Clean up.
 	fin.close();
 	fout.close();
 	delete huffman;
-
-
+	delete in;
 
 	return 0;
 }

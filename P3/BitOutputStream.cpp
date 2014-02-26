@@ -5,7 +5,7 @@ using namespace std;
 
 void BitOutputStream::flush(){
 	out.put((char)(buf.to_ulong()));
-	out.flush();
+	//out.flush();
 	buf.reset();
 	nbits = 7;
 }

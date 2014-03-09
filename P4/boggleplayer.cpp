@@ -1,16 +1,18 @@
 #include "boggleplayer.h"
 #include <iostream>
+#include <set>
+#include <vector>
 using namespace std;
 
 
 BogglePlayer::BogglePlayer(){
-	lexicon = new set<string>();
+	dictionary = new set<string>();
 	lexiconBuilt = false;
 	boardBuilt = false;
 }
 
 BogglePlayer::~BogglePlayer(){
-	delete lexicon;
+	delete dictionary;
 
 	delete_board();
 }
@@ -21,20 +23,33 @@ BogglePlayer::~BogglePlayer(){
 void BogglePlayer::buildLexicon(const vector<string>& word_list){
 	vector<string>::const_iterator it;
 	for(it = word_list.begin(); it != word_list.end(); it++){
-		lexicon->insert(*it);
+		dictionary->insert(*it);
 	}
-	//cout << "Frankie: lexicon is built...." << endl;
 	list = &word_list;
 	lexiconBuilt = true;
 }
 
 
 void BogglePlayer::setBoard(unsigned int rows, unsigned int cols, string** diceArray){
-	
+	// Populate board.
+	set<string> validChar;
 	board = new *string[rows];
 	for(int i = 0; i < rows; i++){
 		board[i] = new string[cols];
+		for(int k = 0; k < cols; k++){
+			board[i][k] = diceArray[i][k];
+			validChar.insert(board[i][k]);
+		}
 	}
+
+	vector<string>::iterator it;
+	for(it = dictionary->begin(); it != dictionary->end(); it++){
+		string word = *it;
+		for(int i = 0; i < word.length(); i++){
+			if(!(dictionary))
+		}
+	}
+
 
 
 	// for(int i = 0; i < rows; i++){
@@ -62,7 +77,7 @@ bool BogglePlayer::getAllValidWords(unsigned int minimum_word_length, set<string
 
 bool BogglePlayer::isInLexicon(const string& word_to_check){
 	cout << "Frankie: isInLexicon is called." << endl;
-	//return (lexicon->find(word_to_check) != lexicon->end());
+	//return (completeDictionary->find(word_to_check) != completeDictionary->end());
 	return true;
 }
 
@@ -80,4 +95,9 @@ void BogglePlayer::delete_board(){
 
 	delete [] board;
 }
+
+
+
+
+
 

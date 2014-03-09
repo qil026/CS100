@@ -4,12 +4,13 @@
 #include "iboggleplayer.h"
 #include <vector>
 #include <string>
+#include <set>
 using namespace std;
 
 
 class BogglePlayer : public IBogglePlayer{
 private:
-	const set<string> *lexicon;
+	set<string> *dictionary;
 	string** board;
 	bool lexiconBuilt;
 	bool boardBuilt;

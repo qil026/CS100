@@ -14,14 +14,16 @@ public:
 	WordNode(char, bool);
 	~WordNode();
 
-	WordNode* getWordNodeFromHere(String);
+	WordNode* getWordNodeFromHere(string);
+	// void recursiveDelete(WordNode*);
 };
 
 
 class WordTree {
 public:
 	WordNode* root;
-	void deleteSubTree(WordNode*);
+	
+	// void deleteSubTree(WordNode*);
 
 	WordTree();
 	~WordTree();
@@ -40,11 +42,13 @@ public:
 
 	vector<BoardNode*> *neighbor;
 
-	void initializeNode(int,int,int);
 	BoardNode(string);
 	~BoardNode();
+
+	void initializeNode(int,int,int);
 	void setVisitedList(vector<BoardNode*> paidVisit);
 	void setTablePosition(int,int);
+	vector<int> find(string);
 };
 
 

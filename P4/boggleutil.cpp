@@ -1,9 +1,10 @@
 #include "boggleutil.h"
+#include <iostream>
 #include <string>
 #include <vector>
 using namespace std;
 
-// WordNode ---------------------------
+// WordNode -----------------------------------------------
 WordNode::WordNode(char input, bool end){
 	value = input;
 	endBit = end;
@@ -11,17 +12,33 @@ WordNode::WordNode(char input, bool end){
 }
 
 WordNode::~WordNode(){
-	delete [] subTree;
+	int size = subTree->size();
+	for(int i = 0; i < size; i++){
+		WordNode* current = subTree->at(i);
+		delete current;
+	}
+	delete subTree;
 }
 
-WordNode*WordNode::getWordNodeFromHere(String input){
+// void WordNode::recursiveDelete(WordNode* node){
+// 	int size = node->subTree->size();
+// 	for(int i = 0; i < size; i++){
+// 		WordNode* current = subTree->at(i);
+// 		recursiveDelete(current);
+// 		delete current;
+// 	}
+// 	delete node->subTree;
+// }
+
+
+WordNode* WordNode::getWordNodeFromHere(string input){
 	WordNode* word = this;
 	for(int i = 0; i < input.length(); i++){
 		char current = input[i];
 		bool found = false;
 		for(int k = 0; k < word->subTree->size(); k++){
-			if(current == word->subTree->get(k)->value){
-				word = word->subTree-get(k);
+			if(current == word->subTree->at(k)->value){
+				word = word->subTree->at(k);
 				found = true;
 				break;
 			}
@@ -31,25 +48,27 @@ WordNode*WordNode::getWordNodeFromHere(String input){
 	return word;
 }
 
-// WordTree ---------------------------
+// WordTree -----------------------------------------------
 WordTree::WordTree(){
 	root = new WordNode(0,false);
 }
 
 WordTree::~WordTree(){
+	cout << "About to clean up word tree" << endl;
 	//delete_sub_tree(root);
-	deleteSubTree(root);
-	delete(root);
+	delete root;
+	cout << "Cleaned up word tree" << endl;
 }
 
-void WordTree::deleteSubTree(WordNode* node){
-	int size = node->subTree->size();
-	for(int i = 0; i < size; i++){
-		WordNode *current = node->subTree->at(i);
-		deleteSubTree(current);
-	}
-	delete node;
-}
+// void WordTree::deleteSubTree(WordNode* node){
+// 	delete node;
+// 	// int size = node->subTree->size();
+// 	// for(int i = 0; i < size; i++){
+// 	// 	WordNode *current = node->subTree->at(i);
+// 	// 	deleteSubTree(current);
+// 	// }
+// 	// delete node;
+// }
 
 
 void WordTree::addWord(string& word){
@@ -73,7 +92,9 @@ void WordTree::addWord(string& word){
 
 		// If no node of char value is found, create it
 		if(!found){
-			node->subTree->push_back(new WordNode(letter,end));
+			WordNode* newWord = new WordNode(letter,end);
+			node->subTree->push_back(newWord);
+			node = newWord;
 		}
 		else{
 			if(end) node->endBit = true;
@@ -82,29 +103,37 @@ void WordTree::addWord(string& word){
 }
 
 bool WordTree::find(const string & word){
+	cout << "About to find word: " << word << endl;
 	WordNode* node = root;
 	char letter;
 	bool end;
-	for(int i = 0; i < word.length(); i++){
-		letter = word[i];
-		if(i == word.length()-1) end = true;
+	for(int index = 0; index < word.length(); index++){
+		letter = word[index];
+		cout << "  dealing with char: " << letter << endl;
+		if(index == word.length()-1) end = true;
 		else end = false; 
 		bool found = false;
 
 		int size = node->subTree->size();
 		for(int i = 0; i < size; i++){
+			cout << "     Looping through subTree, i=" << i;
 			WordNode *current = node->subTree->at(i);
+			cout << "  char=" << current->value << endl;
 			if(current->value == letter){
+				cout << "    Found a match!!!" << endl;
 				found = true;
 				node = current;
+				break;
 			}
 		}
 
 		// If no node of char value is found, return false
 		if(!found){
+			cout << "  didn't find subsequent letters. stop" << endl;
 			return false;
 		}
 		else{
+			cout << " found subsequent letters, continue" << endl;
 			if(end){
 				if(node->endBit)
 					return true;
@@ -113,9 +142,15 @@ bool WordTree::find(const string & word){
 			}
 		}
 	}
+	cout << "Finished finding word" << endl;
 	return false;
 }
 
+
+
+
+
+// BoardNode ----------------------------------------------
 BoardNode::BoardNode(string value){
 	this->value = value;
 	neighbor = new vector<BoardNode*>();
@@ -128,12 +163,32 @@ BoardNode::~BoardNode(){
 	delete neighbor;
 }
 
-// void BoardNode::setVisitedList(vector<BoardNode*> paidVisit){
-// 	//add to visited list
-// 	for(int i = 0; i < paidVisit.size(); i++){
-// 		visited->insert(paidVisit[i]->id);
-// 	}
-// }
+vector<int> BoardNode::find(string input){
+	if(input.length() == 0) return vector<int>;
+	if(input.length() < value.length()) return vector<int>;
+	// this node contains value
+	string currentValue = value;
+	bool match = true;
+
+	int i = 0;
+	for(i; i < currentValue.length(); i++){
+		if(currentValue[i] != input[i]) match = false;
+	}
+	if (!match) return vector<int>;
+	// otherwise
+	// get sub string
+	string output = "";
+	for(i; i < input.length(); i++) output += input[i];
+	for(int index = 0; index < neighbor->size(); index++){
+		BoardNode* next = neighbor->at(index);
+		vector<int> nextResult = find(output);
+		if(nextResult.size()==output.length()){
+			nextResult.push_back(id);
+			return nextResult;
+		}
+	}
+	return vector<int>;	
+}
 
 
 void BoardNode::setTablePosition(int rows,int cols){

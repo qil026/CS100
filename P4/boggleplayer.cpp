@@ -13,20 +13,19 @@ BogglePlayer::BogglePlayer(){
 }
 
 BogglePlayer::~BogglePlayer(){
+	cout << "About to clean up boggle player" << endl;
 	delete dictionary;
 
-	for(int i = 0; i < boardRows; i++){
-		delete [] board[i];
-	}
-	delete [] board;
-
+	// Delete board
 	for(int i = 0; i < boardRows; i++){
 		for(int k = 0; k < boardCols; k++){
 			delete board[i][k];
 		}
-		delete [] board[i];
 	}
+	cout << "deleted all the board node elements" << endl;
 	delete [] board;
+
+	cout << "Cleaned up boggle player" << endl;
 }
 
 
@@ -44,6 +43,7 @@ void BogglePlayer::buildLexicon(const vector<string>& word_list){
 	}
 
 	lexiconBuilt = true;
+	cout << "Lexicon is built successfully" << endl;
 }
 
 
@@ -65,6 +65,7 @@ void BogglePlayer::setBoard(unsigned int rows, unsigned int cols, string** diceA
 	boardRows = rows;
 	boardCols = cols;
 
+	cout << "Board is initialized into 2D array of BoardNode*" << endl;
 
 	// Construct the board trees
 	// Since we have the blocks set up, loop through each and
@@ -81,13 +82,14 @@ void BogglePlayer::setBoard(unsigned int rows, unsigned int cols, string** diceA
 				buildNeighbors(current,visited, newWord);
 			}
 			visited.clear();
-			cout << "Done with board[" << i << "][" << k << "]";
+			//cout << "Done with board[" << i << "][" << k << "]" << endl;
 		}
 	}
 
 
 
 	boardBuilt = true;
+	cout << "Board is built successfully" << endl;
 }
 
 
@@ -127,14 +129,24 @@ bool BogglePlayer::isInLexicon(const string& word_to_check){
 vector<int> BogglePlayer::isOnBoard(const string& word_to_check){
 	// Calls BoardTree.find() method, return that result
 	
+
 	vector<int> result;
+	bool found = false;
+	for(int i = 0; i < boardRows; i++){
+		for(int k = 0; k < boardCols; k++){
+			BoardNode* current = board[i][k];
+			// Start your find here
+			result = current->find(word_to_check);
+			if(result.size() == word_to_check.length()){
+				found = true;
+				break;
+			}
+		}
+		if(found) break;
+	}
 
-
-
-	result.push_back(3);
-	result.push_back(4);
-
-	return result;
+	if(found) return result;
+	else return vector<int>;
 }
 
 void BogglePlayer::getCustomBoard(string** &new_board, unsigned int *rows, unsigned int *cols){
@@ -142,8 +154,8 @@ void BogglePlayer::getCustomBoard(string** &new_board, unsigned int *rows, unsig
 }
 
 void BogglePlayer::buildNeighbors(BoardNode *start, set<int> visited, WordNode* word){
-	int row = current->row;
-	int col = current->col;
+	int row = start->row;
+	int col = start->col;
 
 	// Loop through its neighbors
 	for(int i = row-1; i <= row+1; i++){
@@ -154,18 +166,18 @@ void BogglePlayer::buildNeighbors(BoardNode *start, set<int> visited, WordNode* 
 				int neighborId = current->id;
 				set<int>::iterator result = visited.find(neighborId);
 				// do something only if the node is not visited yet
-				if(result == set::end){
+				if(result == visited.end()){
 					// the new neighbor is never visited.
 					// Create a new BoardNode with identical information
 					// Then build its subtree, and link to current 
 					BoardNode *newNode = new BoardNode(current->value);
-					newNode->initializeNode(i,k,boardCols)
+					newNode->initializeNode(i,k,boardCols);
 					set<int> copy = visited;
 					copy.insert(neighborId);
 					// Only continue to build if dictionary is still valid
 					WordNode* newWord = word->getWordNodeFromHere(current->value);
 					if(newWord != nullptr){
-						buildNeighbors(newNode,copy);
+						buildNeighbors(newNode,copy,newWord);
 						// After the subtree of this new node is built
 						// Link to the start node
 						start->neighbor->push_back(newNode);

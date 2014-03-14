@@ -2,6 +2,7 @@
 #define BOGGLEPLAYER_H
 
 #include "iboggleplayer.h"
+#include "boggleutil.h"
 #include <vector>
 #include <string>
 #include <set>
@@ -10,8 +11,13 @@ using namespace std;
 
 class BogglePlayer : public IBogglePlayer{
 private:
-	set<string> *dictionary;
-	string** board;
+	WordTree *dictionary;
+
+	BoardNode*** board;
+	int boardRows,boardCols;
+
+
+	
 	bool lexiconBuilt;
 	bool boardBuilt;
 
@@ -25,8 +31,8 @@ public:
 	void getCustomBoard(string** &, unsigned int *, unsigned int *);
 	~BogglePlayer();
 
-	void delete_board();
-
+	// Added helper functions
+	void buildNeighbors(BoardNode*,set<int>,WordNode*);
 };
 
 #endif
